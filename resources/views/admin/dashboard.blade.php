@@ -241,7 +241,7 @@
             </div>
         </div>
 
-        {{-- 2. Revenue per Kategori (Grafis Batang Vertikal / Ke Atas) --}}
+        {{-- 2. Revenue per Kategori (Grafis Batang Vertikal) --}}
         <div class="col-xl-5">
             <div class="section-card">
                 <div class="section-title">
@@ -423,7 +423,7 @@
         }
     });
 
-    // ── Chart 2: Revenue per Kategori (BATANG VERTIKAL / KE ATAS) ──
+    // ── Chart 2: Revenue per Kategori (FIXED VERTIKAL) ──
     @if(!$revenueByCategory->isEmpty())
     const ctxRevenue = document.getElementById('categoryRevenueChart').getContext('2d');
     new Chart(ctxRevenue, {
@@ -463,13 +463,18 @@
             },
             scales: {
                 x: {
-                    grid: { display: false }
+                    grid: { display: false },
+                    ticks: {
+                        autoSkip: false,   // Memaksa semua label kategori untuk selalu dirender
+                        maxRotation: 45,   // Memiringkan tulisan teks 45 derajat agar muat
+                        minRotation: 45    // Memiringkan tulisan teks 45 derajat agar muat
+                    }
                 },
                 y: {
                     grid: { display: false },
                     ticks: {
                         callback: function(value) {
-                            // Bagian ini diubah untuk menampilkan nilai Rupiah penuh (tanpa disingkat)
+                            // Menampilkan nominal rupiah secara utuh penuh (tanpa disingkat M / Juta)
                             return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
                         }
                     }
