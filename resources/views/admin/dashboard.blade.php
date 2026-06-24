@@ -29,14 +29,14 @@
         .period-btn.active   { background:#1a3c5e; border-color:#1a3c5e; color:#fff; font-weight:600; }
         .filter-divider      { width:1px; background:#dee2e6; margin:0 .5rem; align-self:stretch; }
 
-        /* ── Cards ── */
+        /* ── Cards Stat (Modifikasi Kreatif dengan Hover Effect) ── */
         .card-stat     { background:#fff; border-radius:.6rem; padding:1.4rem 1.5rem;
-                         box-shadow:0 1px 4px rgba(0,0,0,.06); border:none; }
+                         box-shadow:0 1px 4px rgba(0,0,0,.06); border:none; transition: all 0.3s ease; }
+        .card-stat:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(26,60,94,0.15); }
         .card-stat .icon { width:48px; height:48px; border-radius:.5rem;
                            display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
-        .card-stat .value { font-size:1.5rem; font-weight:700; color:#1a3c5e; }
+        .card-stat .value { font-size:1.4rem; font-weight:700; color:#1a3c5e; }
         .card-stat .label { font-size:.8rem; color:#6c757d; margin-top:.2rem; }
-        .card-stat .delta { font-size:.75rem; margin-top:.3rem; }
 
         /* ── Section cards ── */
         .section-card  { background:#fff; border-radius:.6rem; padding:1.5rem;
@@ -58,8 +58,6 @@
         .stars  { color:#f4a820; font-size:.85rem; }
         .bar-wrap { height:6px; border-radius:3px; background:#e9ecef; }
         .bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#1a3c5e,#2e86c1); }
-        .rev-bar  { height:8px; border-radius:4px; background:#e9ecef; min-width:80px; }
-        .rev-fill { height:100%; border-radius:4px; }
         #customRange { display:none; }
     </style>
 @endpush
@@ -102,7 +100,7 @@
                     <input type="hidden" name="period" id="periodInput" value="{{ $period }}">
                 </div>
 
-                {{-- Custom range (tampil jika period=custom) --}}
+                {{-- Custom range --}}
                 <div id="customRange" class="d-flex gap-2 align-items-end">
                     <div>
                         <div class="form-label">Dari</div>
@@ -160,36 +158,6 @@
                 </div>
 
             </div>
-
-            {{-- Active filter badges --}}
-            @if (request()->hasAny(['period','category_id','status','start_date','end_date']))
-            <div class="d-flex flex-wrap gap-2 mt-3 pt-3 border-top">
-                <small class="text-muted align-self-center">Filter aktif:</small>
-
-                @if ($period !== '30')
-                <span class="badge rounded-pill" style="background:#e8f4fd; color:#1a6fad">
-                    <i class="bi bi-calendar3"></i>
-                    {{ $period === 'custom'
-                        ? $startDate->format('d M').' – '.$endDate->format('d M Y')
-                        : $period.' hari terakhir' }}
-                </span>
-                @endif
-
-                @if ($categoryFilter)
-                <span class="badge rounded-pill" style="background:#eafaf1; color:#1a7a4a">
-                    <i class="bi bi-tag"></i>
-                    {{ $categories->firstWhere('id', $categoryFilter)?->name }}
-                </span>
-                @endif
-
-                @if ($statusFilter && $statusFilter !== 'all')
-                <span class="badge rounded-pill" style="background:#fef9e7; color:#b7950b">
-                    <i class="bi bi-circle-fill" style="font-size:.5rem"></i>
-                    {{ ucfirst($statusFilter) }}
-                </span>
-                @endif
-            </div>
-            @endif
         </div>
     </form>
 
@@ -214,7 +182,7 @@
                     <i class="bi {{ $card['icon'] }}"></i>
                 </div>
                 <div>
-                    <div class="value" style="white-space: nowrap; font-size: 1rem;">{{ $card['value'] }}</div>
+                    <div class="value" style="white-space: nowrap;">{{ $card['value'] }}</div>
                     <div class="label">{{ $card['label'] }}</div>
                 </div>
             </div>
@@ -222,7 +190,7 @@
         @endforeach
     </div>
 
-    {{-- ── ROW 1: Top Produk + Revenue Kategori ───────────────────────── --}}
+    {{-- ── ROW 1: Top Produk + Revenue Kategori ── --}}
     <div class="row g-4">
 
         {{-- 1. Top 10 Produk --}}
@@ -231,11 +199,6 @@
                 <div class="section-title">
                     <i class="bi bi-trophy-fill text-warning"></i>
                     Top 10 Produk Terlaris
-                    @if($categoryFilter)
-                        <span class="badge ms-1" style="background:#eafaf1;color:#1a7a4a;font-size:.7rem">
-                            {{ $categories->firstWhere('id',$categoryFilter)?->name }}
-                        </span>
-                    @endif
                 </div>
                 @if($topProducts->isEmpty())
                     <p class="text-muted text-center py-4">Tidak ada data untuk filter ini.</p>
@@ -267,8 +230,7 @@
                             </td>
                             <td style="width:90px">
                                 <div class="bar-wrap">
-                                    <div class="bar-fill"
-                                         style="width:{{ round(($p->total_qty/$maxQty)*100) }}%"></div>
+                                    <div class="bar-fill" style="width:{{ round(($p->total_qty/$maxQty)*100) }}%"></div>
                                 </div>
                             </td>
                         </tr>
@@ -279,48 +241,18 @@
             </div>
         </div>
 
-        {{-- 2. Revenue per Kategori --}}
+        {{-- 2. Revenue per Kategori (Grafis Batang Vertikal / Ke Atas) --}}
         <div class="col-xl-5">
             <div class="section-card">
                 <div class="section-title">
-                    <i class="bi bi-pie-chart-fill text-primary"></i>
-                    Revenue per Kategori
-                    <span class="badge bg-primary ms-auto" style="font-size:.7rem">
-                        {{ $period === 'custom'
-                            ? $startDate->format('d M').' – '.$endDate->format('d M')
-                            : $period.' Hari' }}
-                    </span>
+                    <i class="bi bi-bar-chart-line-fill text-primary"></i>
+                    Grafik Distribusi Revenue per Kategori
                 </div>
                 @if($revenueByCategory->isEmpty())
                     <p class="text-muted text-center py-4">Tidak ada data untuk filter ini.</p>
                 @else
-                @php
-                    $maxRev   = $revenueByCategory->max('total_revenue') ?: 1;
-                    $totalRev = $revenueByCategory->sum('total_revenue');
-                    $palette  = ['#1a3c5e','#2e86c1','#117a65','#b7950b','#8e44ad','#c0392b','#d35400'];
-                @endphp
-                <div class="d-flex flex-column gap-3">
-                    @foreach ($revenueByCategory as $i => $cat)
-                    <div>
-                        <div class="d-flex justify-content-between mb-1">
-                            <span class="fw-semibold" style="font-size:.875rem">{{ $cat->category_name }}</span>
-                            <span class="fw-semibold" style="color:{{ $palette[$i % 7] }}">
-                                Rp {{ number_format($cat->total_revenue,0,',','.') }}
-                            </span>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="rev-bar flex-grow-1">
-                                <div class="rev-fill"
-                                     style="width:{{ round(($cat->total_revenue/$maxRev)*100) }}%;
-                                            background:{{ $palette[$i % 7] }}"></div>
-                            </div>
-                            <small class="text-muted" style="width:36px;text-align:right">
-                                {{ round(($cat->total_revenue/$totalRev)*100) }}%
-                            </small>
-                        </div>
-                        <small class="text-muted">{{ number_format($cat->total_qty) }} item · {{ $cat->total_orders }} order</small>
-                    </div>
-                    @endforeach
+                <div style="height: 380px; position: relative;">
+                    <canvas id="categoryRevenueChart"></canvas>
                 </div>
                 @endif
             </div>
@@ -381,35 +313,20 @@
                             <th>#</th><th>User</th>
                             <th class="text-center">Order</th>
                             <th class="text-end">Total Belanja</th>
-                            <th class="text-end">Avg/Order</th>
                             <th>Terakhir</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($activeUsers as $i => $u)
                         <tr>
-                            <td>
-                                @php $rc = match($i){0=>'rank-1',1=>'rank-2',2=>'rank-3',default=>'rank-n'}; @endphp
-                                <span class="badge-rank {{ $rc }}">{{ $i+1 }}</span>
-                            </td>
+                            <td><span class="badge-rank {{ match($i){0=>'rank-1',1=>'rank-2',2=>'rank-3',default=>'rank-n'} }}">{{ $i+1 }}</span></td>
                             <td>
                                 <div class="fw-semibold" style="color:#1a3c5e">{{ $u->name }}</div>
                                 <small class="text-muted">{{ $u->email }}</small>
                             </td>
-                            <td class="text-center">
-                                <span class="badge bg-primary rounded-pill">{{ $u->total_orders }}</span>
-                            </td>
-                            <td class="text-end fw-semibold text-success" style="white-space: nowrap;">
-                                Rp {{ number_format($u->total_spent,0,',','.') }}
-                            </td>
-                            <td class="text-end text-muted" style="white-space: nowrap;">
-                                Rp {{ number_format($u->avg_order_value,0,',','.') }}
-                            </td>
-                            <td>
-                                <small class="text-muted">
-                                    {{ \Carbon\Carbon::parse($u->last_order_at)->diffForHumans() }}
-                                </small>
-                            </td>
+                            <td class="text-center"><span class="badge bg-primary rounded-pill">{{ $u->total_orders }}</span></td>
+                            <td class="text-end fw-semibold text-success" style="white-space: nowrap;">Rp {{ number_format($u->total_spent,0,',','.') }}</td>
+                            <td><small class="text-muted">{{ \Carbon\Carbon::parse($u->last_order_at)->diffForHumans() }}</small></td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -420,11 +337,53 @@
         </div>
 
     </div>
-</main>
+
+    {{-- ── ROW 3: Sentimen Rating + Statistik Kupon ───────────────────── --}}
+    <div class="row g-4 mt-0">
+
+        {{-- 5. Analisis Sentimen Rating --}}
+        <div class="col-xl-6">
+            <div class="section-card">
+                <div class="section-title">
+                    <i class="bi bi-emoji-smile-fill text-warning"></i> Analisis Sentimen Rating Ulasan (Doughnut Chart)
+                </div>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {{-- 6. Statistik Kupon --}}
+        <div class="col-xl-6">
+            <div class="section-card">
+                <div class="section-title">
+                    <i class="bi bi-ticket-perforated-fill text-primary"></i> Kinerja &amp; Kuantitas Kupon
+                </div>
+                <div class="row text-center mt-4">
+                    <div class="col-4">
+                        <h3 class="fw-bold" style="color:#1a7a4a">{{ $couponStats['aktif'] }}</h3>
+                        <p class="text-muted small mb-0">Kupon Aktif</p>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="fw-bold" style="color:#c0392b">{{ $couponStats['kadaluarsa'] }}</h3>
+                        <p class="text-muted small mb-0">Kupon Kedaluwarsa</p>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="fw-bold" style="color:#1a6fad">{{ $couponStats['total_used'] }}</h3>
+                        <p class="text-muted small mb-0">Total Penggunaan</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // ── Period button toggle ───────────────────────────────────────────────────
+    // ── Toggle Filter Periode ──────────────────────────────────────────────────
     document.querySelectorAll('.period-btn').forEach(btn => {
         btn.addEventListener('click', function () {
             document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
@@ -432,18 +391,93 @@
 
             const period = this.dataset.period;
             document.getElementById('periodInput').value = period;
-            document.getElementById('customRange').style.display =
-                period === 'custom' ? 'flex' : 'none';
+            document.getElementById('customRange').style.display = period === 'custom' ? 'flex' : 'none';
 
-            // Auto-submit untuk period non-custom
             if (period !== 'custom') document.getElementById('filterForm').submit();
         });
     });
 
-    // Tampilkan custom range jika period=custom saat halaman load
     if (document.getElementById('periodInput').value === 'custom') {
         document.getElementById('customRange').style.display = 'flex';
     }
+
+    // ── Chart 1: Sentimen Rating (Doughnut) ────────────────────────────────────
+    const ctxSentiment = document.getElementById('sentimentChart').getContext('2d');
+    new Chart(ctxSentiment, {
+        type: 'doughnut',
+        data: {
+            labels: ['Positif (Bintang 4-5)', 'Netral (Bintang 3)', 'Negatif (Bintang 1-2)'],
+            datasets: [{
+                data: [
+                    {{ $sentimentAnalysis['positif'] }},
+                    {{ $sentimentAnalysis['netral'] }},
+                    {{ $sentimentAnalysis['negatif'] }}
+                ],
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+        }
+    });
+
+    // ── Chart 2: Revenue per Kategori (BATANG VERTIKAL / KE ATAS) ──
+    @if(!$revenueByCategory->isEmpty())
+    const ctxRevenue = document.getElementById('categoryRevenueChart').getContext('2d');
+    new Chart(ctxRevenue, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($revenueByCategory->pluck('category_name')) !!},
+            datasets: [{
+                label: 'Total Revenue',
+                data: {!! json_encode($revenueByCategory->pluck('total_revenue')) !!},
+                backgroundColor: [
+                    'rgba(26, 60, 94, 0.85)',
+                    'rgba(46, 134, 193, 0.85)',
+                    'rgba(17, 122, 101, 0.85)',
+                    'rgba(183, 149, 11, 0.85)',
+                    'rgba(142, 68, 173, 0.85)'
+                ],
+                borderColor: [
+                    '#1a3c5e', '#2e86c1', '#117a65', '#b7950b', '#8e44ad'
+                ],
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let value = context.raw;
+                            return ' Revenue: Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: {
+                        callback: function(value) {
+                            // Bagian ini diubah untuk menampilkan nilai Rupiah penuh (tanpa disingkat)
+                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+    @endif
 </script>
 @endpush
 
